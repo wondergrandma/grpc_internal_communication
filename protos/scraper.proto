@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package scraper;
+
+service Scraper{
+    rpc ScrapeFilmInfo(Request) returns (Response) {}
+}
+
+message Request{
+    string filmName = 1;
+}
+
+message Response{
+    bool scraped = 1;
+}
