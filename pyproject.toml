@@ -10,6 +10,8 @@ python = "^3.11"
 grpcio = "^1.73.1"
 grpcio-tools = "^1.73.1"
 selenium = "^4.34.0"
+sqlalchemy = "^2.0.41"
+psycopg2 = "^2.9.10"
 
 
 [build-system]
