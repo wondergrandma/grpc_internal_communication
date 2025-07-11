@@ -1,6 +1,5 @@
-from sqlalchemy import ForeignKey
-from sqlalchemy import Column
-from sqlalchemy import Table
+from sqlalchemy import Column, ForeignKey, Table
+
 from database.Models.base import Base
 
 category_film = Table(
