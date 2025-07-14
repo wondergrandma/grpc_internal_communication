@@ -10,16 +10,14 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 import re
 
-
 class TmdbScraper(ScraperBase):
     def __init__(self, url):
-        #options = Options()
-        #options.add_argument('--headless')
-        #self.driver = webdriver.Chrome(options=options)
+        options = Options()
+        options.add_argument('--headless')
+        self.driver = webdriver.Chrome(options=options)
         self.driver = webdriver.Chrome()
         self.driver.get(url)
         self.wait = WebDriverWait(self.driver, 10)
-        
 
     def check_site_availability(self) -> bool:
         try: 
@@ -51,3 +49,6 @@ class TmdbScraper(ScraperBase):
         return ScrapedFilm(Name=title.text, MakeYear=make_year.text, Hour=hours, Minute=minutes, 
                            Categories="", Overview=overview.text, 
                            Actors="", Director="", Writer="", Rating="", CoverPath="")
+    
+    def close(self):
+        self.driver.quit()

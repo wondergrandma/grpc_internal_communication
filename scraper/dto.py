@@ -13,5 +13,3 @@ class ScrapedFilm(BaseModel):
     Writer: str
     Rating: int
     CoverPath: str
-    class Config:
-        allow_mutation = False
