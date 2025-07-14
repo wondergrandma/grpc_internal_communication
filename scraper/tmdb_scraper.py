@@ -1,8 +1,8 @@
 from selenium.webdriver.chrome.options import Options
 import requests
-from scraper_base import ScraperBase
+from scraper.scraper_base import ScraperBase
 from selenium.webdriver.support.ui import WebDriverWait
-from dto import ScrapedFilm
+from scraper.dto import ScrapedFilm
 from selenium import webdriver
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -13,12 +13,13 @@ import re
 
 class TmdbScraper(ScraperBase):
     def __init__(self, url):
-        self.url = url
         #options = Options()
         #options.add_argument('--headless')
         #self.driver = webdriver.Chrome(options=options)
         self.driver = webdriver.Chrome()
-        wait = WebDriverWait(self.driver, 10)
+        self.driver.get(url)
+        self.wait = WebDriverWait(self.driver, 10)
+        
 
     def check_site_availability(self) -> bool:
         try: 
@@ -38,10 +39,15 @@ class TmdbScraper(ScraperBase):
 
         title = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/h2/a')))
         make_year = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/div/span[2]')))
-        age_restriction = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]')))
+        #age_restriction = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]')))
         length = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/div/span[4]')))
         overview = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/div/p')))
 
-        print(re.match(r"^\s*\d+[h]\s*\d+[m]", length))
+        split: list = length.text.split(" ")
+        hours: str = re.match(r"^\d+", split[0].strip()).group(0)
+        minutes: str = re.match(r"^\d+", split[1].strip()).group(0)
 
-        return ScrapedFilm(title=title, make_year=make_year, age_restriction=age_restriction, length=length, overview=overview)
+
+        return ScrapedFilm(Name=title.text, MakeYear=make_year.text, Hour=hours, Minute=minutes, 
+                           Categories="", Overview=overview.text, 
+                           Actors="", Director="", Writer="", Rating="", CoverPath="")
