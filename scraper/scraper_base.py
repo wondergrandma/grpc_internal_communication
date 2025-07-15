@@ -10,3 +10,7 @@ class ScraperBase(ABC):
     @abstractmethod
     def scrape(self) -> bool:
         pass
+
+    @abstractmethod
+    def close(self) -> None:
+        pass
