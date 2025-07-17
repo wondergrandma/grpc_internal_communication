@@ -92,7 +92,7 @@ class TmdbScraper(ScraperBase):
             )
         )
 
-        Utils.create_film(
+        new_film: int = Utils.create_film(
             name=title_element.text,
             make_year=self.extract_year(make_year_element.text),
             hour=length_element[0],
@@ -106,9 +106,7 @@ class TmdbScraper(ScraperBase):
             cover_path="",
         )
 
-        # return ScrapedFilm(Name=title_element.text, MakeYear=self.extract_year(make_year_element.text), Hour=length_element[0], Minute=length_element[1],
-        #                    Categories=self.get_categories(genre_element), Overview=overview_element.text,
-        #                    Actors=self.get_actors(actors_element), Director="", Writer="", Rating=1, CoverPath="")
+        return new_film
 
     def get_categories(self, categories: List[str]) -> List[Category]:
         categories_list: List[Category] = []

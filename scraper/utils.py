@@ -34,7 +34,7 @@ class Utils:
         writer: str,
         rating: int,
         cover_path: str,
-    ) -> Row:
+    ) -> int:
         try:
             new_film = Film(
                 Name=name,
