@@ -1,0 +1,56 @@
+from typing import List
+
+from sqlalchemy import select
+
+from database.models.actor import Actor
+from database.models.category import Category
+from database.models.film import Film
+from database.queries import Connector, Session
+
+
+class FilmQuery:
+    session: Session = Connector.session
+
+    @staticmethod
+    def get_film(name: str) -> Film | None:
+        stmt = select(Film).where(Film.Name == name)
+        result = FilmQuery.session.scalar(stmt)
+
+        return result
+
+    @staticmethod
+    def create_film(
+        name: str,
+        make_year: int,
+        hour: int,
+        minute: int,
+        categories: List[Category],
+        overview: str,
+        actors: List[Actor],
+        director: str,
+        writer: str,
+        rating: int,
+        cover_path: str,
+    ) -> int:
+        try:
+            new_film = Film(
+                Name=name,
+                MakeYear=make_year,
+                Hour=hour,
+                Minute=minute,
+                Categories=categories,
+                Overview=overview,
+                Actors=actors,
+                Director=director,
+                Writer=writer,
+                Rating=rating,
+                CoverPath=cover_path,
+            )
+            FilmQuery.session.add(new_film)
+            FilmQuery.session.commit()
+
+            return new_film.Id
+
+        except:
+            FilmQuery.session.rollback()
+            raise

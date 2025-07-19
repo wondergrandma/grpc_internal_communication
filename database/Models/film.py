@@ -1,10 +1,11 @@
 from typing import List
 
+import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.Models.asociations.actor_film import actor_film
-from database.Models.asociations.category_film import category_film
-from database.Models.base import Base
+from database.models.asociations.actor_film import actor_film
+from database.models.asociations.category_film import category_film
+from database.models.base import Base
 
 
 class Film(Base):
@@ -15,11 +16,11 @@ class Film(Base):
     MakeYear: Mapped[int] = mapped_column()
     Hour: Mapped[int] = mapped_column()
     Minute: Mapped[int] = mapped_column()
-    Categories: Mapped[List["Category"]] = relationship(
+    Categories: Mapped[List["Category"]] = relationship(  # type: ignore
         "Category", secondary=category_film, back_populates="Film"
     )
     Overview: Mapped[str] = mapped_column()
-    Actors: Mapped[List["Actor"]] = relationship(
+    Actors: Mapped[List["Actor"]] = relationship(  # type: ignore
         "Actor", secondary=actor_film, back_populates="Film"
     )
     Director: Mapped[str] = mapped_column()

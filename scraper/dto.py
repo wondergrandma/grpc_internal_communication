@@ -1,12 +1,17 @@
+from typing import List
+
 from pydantic import BaseModel
-from typing import Union
+
 
 class ScrapedFilm(BaseModel):
-    title: str
-    make_year: int
-    age_restriction: Union[int, str]
-    length: int
-    overview: str
-
-    class Config:
-        allow_mutation = False
+    Name: str
+    MakeYear: int
+    Hour: int
+    Minute: int
+    Categories: List
+    Overview: str
+    Actors: List
+    Director: str
+    Writer: str
+    Rating: int
+    CoverPath: str

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Table
 
-from database.Models.base import Base
+from database.models.base import Base
 
 actor_film = Table(
     "ActorFilm",

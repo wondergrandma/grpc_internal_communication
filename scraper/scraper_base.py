@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
+
 
 class ScraperBase(ABC):
 
@@ -9,4 +11,8 @@ class ScraperBase(ABC):
 
     @abstractmethod
     def scrape(self) -> bool:
+        pass
+
+    @abstractmethod
+    def close(self) -> None:
         pass
