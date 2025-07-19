@@ -13,9 +13,11 @@ from sqlalchemy.engine.row import Row
 
 from database.models.actor import Actor
 from database.models.category import Category
+from database.queries.actor_queries import ActorQuery
+from database.queries.category_queries import CategoryQuery
+from database.queries.film_queries import FilmQuery
 from scraper.dto import ScrapedFilm
 from scraper.scraper_base import ScraperBase
-from scraper.utils import Utils
 
 
 class TmdbScraper(ScraperBase):
@@ -58,7 +60,14 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
-        # age_restriction = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]')))
+        age_restriction = self.wait.until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]',
+                )
+            )
+        )
         length_element = self.extract_time(
             self.wait.until(
                 EC.presence_of_element_located(
@@ -92,7 +101,7 @@ class TmdbScraper(ScraperBase):
             )
         )
 
-        new_film: int = Utils.create_film(
+        new_film: int = FilmQuery.create_film(
             name=title_element.text,
             make_year=self.extract_year(make_year_element.text),
             hour=length_element[0],
@@ -112,16 +121,18 @@ class TmdbScraper(ScraperBase):
         categories_list: List[Category] = []
 
         for genre in categories:
-            temp_gener: Category = Utils.get_category_by_genre(genre)
+            temp_gener: Category = CategoryQuery.get_category_by_genre(genre)
 
             if isinstance(temp_gener, Category):
                 categories_list.append(temp_gener)
             else:
-                created: Tuple[int] = Utils.create_category(genre)
+                created: Tuple[int] = CategoryQuery.create_category(genre)
 
                 if isinstance(created, Row):
                     print("SOM TU")
-                    new_category: Category = Utils.get_category_by_id(created[0])
+                    new_category: Category = CategoryQuery.get_category_by_id(
+                        created[0]
+                    )
                     categories_list.append(new_category)
 
         return categories_list
@@ -131,19 +142,19 @@ class TmdbScraper(ScraperBase):
 
         for actor in actors:
             actor_name = self.extract_name_surname(actor)
-            temp_actor: Actor = Utils.get_actor_by_name(
+            temp_actor: Actor = ActorQuery.get_actor_by_name(
                 name=actor_name[0], surname=actor_name[1]
             )
 
             if isinstance(temp_actor, Actor):
                 actors_list.append(temp_actor)
             else:
-                created: Tuple[int] = Utils.create_actor(
+                created: Tuple[int] = ActorQuery.create_actor(
                     name=actor_name[0], surname=actor_name[1]
                 )
 
                 if isinstance(created, Row):
-                    new_actor: Actor = Utils.get_actor_by_id(created[0])
+                    new_actor: Actor = ActorQuery.get_actor_by_id(created[0])
                     actors_list.append(new_actor)
 
         return actors_list
