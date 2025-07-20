@@ -2,9 +2,9 @@ from typing import List
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.models.asociations.actor_film import actor_film
-from database.models.base import Base
-from database.models.film import Film
+from server.database.models.asociations.actor_film import actor_film
+from server.database.models.base import Base
+from server.database.models.film import Film
 
 
 class Actor(Base):

@@ -11,17 +11,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from sqlalchemy.engine.row import Row
 
-from database.models.actor import Actor
-from database.models.category import Category
-from database.queries.actor_queries import ActorQuery
-from database.queries.category_queries import CategoryQuery
-from database.queries.film_queries import FilmQuery
-from scraper.dto import ScrapedFilm
-from scraper.scraper_base import ScraperBase
+from server.database.models.actor import Actor
+from server.database.models.category import Category
+from server.database.queries.actor_queries import ActorQuery
+from server.database.queries.category_queries import CategoryQuery
+from server.database.queries.film_queries import FilmQuery
+from server.scraper.dto import ScrapedFilm
+from server.scraper.scraper_base import ScraperBase
+
+from types import SimpleNamespace
+
 
 
 class TmdbScraper(ScraperBase):
-    def __init__(self, url):
+    def __init__(self):
+        url: str = "https://www.themoviedb.org/"
         options = Options()
         options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=options)
@@ -47,12 +51,12 @@ class TmdbScraper(ScraperBase):
 
         cards_element[0].find_element(By.TAG_NAME, "a").click()
 
-        title_element = self.wait.until(
+        title_element: WebElement = self.wait.until(
             EC.presence_of_element_located(
                 (By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/h2/a')
             )
         )
-        make_year_element = self.wait.until(
+        make_year_element: WebElement = self.wait.until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -60,15 +64,7 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
-        age_restriction = self.wait.until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]',
-                )
-            )
-        )
-        length_element = self.extract_time(
+        length_element: WebElement = self.extract_time(
             self.wait.until(
                 EC.presence_of_element_located(
                     (
@@ -78,7 +74,7 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
-        genre_element = self.extract_genre(
+        genre_element: WebElement = self.extract_genre(
             self.wait.until(
                 EC.presence_of_element_located(
                     (
@@ -88,15 +84,31 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
-        overview_element = self.wait.until(
+        overview_element: WebElement = self.wait.until(
             EC.presence_of_element_located(
                 (By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/div/p')
             )
         )
-        actors_element = self.extract_actors(
+        actors_element: WebElement = self.extract_actors(
             element=self.wait.until(
                 EC.presence_of_element_located(
                     (By.XPATH, '//*[@id="cast_scroller"]/ol')
+                )
+            )
+        )
+
+        directors: WebElement = self.extract_director(self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/ol'))))
+
+        for p in directors: 
+            print(p.name)
+        
+        rating_element: WebElement = ...
+
+        age_restriction: WebElement = self.wait.until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]',
                 )
             )
         )
@@ -129,7 +141,6 @@ class TmdbScraper(ScraperBase):
                 created: Tuple[int] = CategoryQuery.create_category(genre)
 
                 if isinstance(created, Row):
-                    print("SOM TU")
                     new_category: Category = CategoryQuery.get_category_by_id(
                         created[0]
                     )
@@ -158,6 +169,22 @@ class TmdbScraper(ScraperBase):
                     actors_list.append(new_actor)
 
         return actors_list
+    
+    def extract_director(self, people: WebElement):
+        people_list: List[WebElement] = people.find_elements(By.TAG_NAME, "li")
+        directors: List[SimpleNamespace] = []
+
+        for people in people_list: 
+            name = people.find_element(By.TAG_NAME, "a")
+
+            role = people.find_elements(By.TAG_NAME, "p")[1]
+
+            temp_person: SimpleNamespace = SimpleNamespace(name = name.text, role = [r.strip().lower() for r in role.text.split(",")])
+
+            if "director" in temp_person.role:
+                directors.append(temp_person)
+
+        return directors  
 
     def extract_genre(self, genres: WebElement) -> List[str]:
         genre_elements: List[WebElement] = genres.find_elements(By.TAG_NAME, "a")

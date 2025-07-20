@@ -1,8 +1,8 @@
 from sqlalchemy import insert, select
 from sqlalchemy.engine.row import Row
 
-from database.models.category import Category
-from database.queries import Connector, Session
+from server.database.models.category import Category
+from server.database.queries import Connector, Session
 
 
 class CategoryQuery:

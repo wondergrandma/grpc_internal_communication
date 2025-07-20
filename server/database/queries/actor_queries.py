@@ -1,8 +1,8 @@
 from sqlalchemy import insert, select
 from sqlalchemy.engine.row import Row
 
-from database.models.actor import Actor
-from database.queries import Connector, Session
+from server.database.models.actor import Actor
+from server.database.queries import Connector, Session
 
 
 class ActorQuery:
