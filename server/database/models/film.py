@@ -22,8 +22,7 @@ class Film(Base):
     Actors: Mapped[List["Actor"]] = relationship(  # type: ignore
         "Actor", secondary=actor_film, back_populates="Film"
     )
-    Director: Mapped[str] = mapped_column()
-    Writer: Mapped[str] = mapped_column()
+    Directors: Mapped[str] = mapped_column()
     Rating: Mapped[int] = mapped_column()
     CoverPath: Mapped[str] = mapped_column()
 

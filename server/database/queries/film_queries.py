@@ -27,8 +27,7 @@ class FilmQuery:
         categories: List[Category],
         overview: str,
         actors: List[Actor],
-        director: str,
-        writer: str,
+        directors: str,
         rating: int,
         cover_path: str,
     ) -> int:
@@ -41,8 +40,7 @@ class FilmQuery:
                 Categories=categories,
                 Overview=overview,
                 Actors=actors,
-                Director=director,
-                Writer=writer,
+                Director=directors,
                 Rating=rating,
                 CoverPath=cover_path,
             )

@@ -21,8 +21,6 @@ from server.scraper.scraper_base import ScraperBase
 
 from types import SimpleNamespace
 
-
-
 class TmdbScraper(ScraperBase):
     def __init__(self):
         url: str = "https://www.themoviedb.org/"
@@ -98,9 +96,6 @@ class TmdbScraper(ScraperBase):
         )
 
         directors: WebElement = self.extract_director(self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/ol'))))
-
-        for p in directors: 
-            print(p.name)
         
         rating_element: WebElement = ...
 
@@ -121,8 +116,7 @@ class TmdbScraper(ScraperBase):
             categories=self.get_categories(genre_element),
             overview=overview_element.text,
             actors=self.get_actors(actors_element),
-            director="",
-            writer="",
+            directors=directors,
             rating=1,
             cover_path="",
         )
