@@ -1,5 +1,7 @@
 import re
+from types import SimpleNamespace
 from typing import List, Tuple
+from urllib.request import urlretrieve
 
 import requests
 from selenium import webdriver
@@ -13,13 +15,14 @@ from sqlalchemy.engine.row import Row
 
 from server.database.models.actor import Actor
 from server.database.models.category import Category
+from server.database.models.director import Director
 from server.database.queries.actor_queries import ActorQuery
 from server.database.queries.category_queries import CategoryQuery
 from server.database.queries.film_queries import FilmQuery
+from server.database.queries.director_queries import DirectorQuery
 from server.scraper.dto import ScrapedFilm
 from server.scraper.scraper_base import ScraperBase
 
-from types import SimpleNamespace
 
 class TmdbScraper(ScraperBase):
     def __init__(self):
@@ -54,6 +57,7 @@ class TmdbScraper(ScraperBase):
                 (By.XPATH, '//*[@id="original_header"]/div[2]/section/div[1]/h2/a')
             )
         )
+
         make_year_element: WebElement = self.wait.until(
             EC.presence_of_element_located(
                 (
@@ -62,6 +66,7 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
+
         length_element: WebElement = self.extract_time(
             self.wait.until(
                 EC.presence_of_element_located(
@@ -72,6 +77,7 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
+
         genre_element: WebElement = self.extract_genre(
             self.wait.until(
                 EC.presence_of_element_located(
@@ -82,11 +88,13 @@ class TmdbScraper(ScraperBase):
                 )
             )
         )
+
         overview_element: WebElement = self.wait.until(
             EC.presence_of_element_located(
                 (By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/div/p')
             )
         )
+
         actors_element: WebElement = self.extract_actors(
             element=self.wait.until(
                 EC.presence_of_element_located(
@@ -95,18 +103,26 @@ class TmdbScraper(ScraperBase):
             )
         )
 
-        directors: WebElement = self.extract_director(self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/ol'))))
-        
-        rating_element: WebElement = ...
-
-        age_restriction: WebElement = self.wait.until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    '//*[@id="original_header"]/div[2]/section/div[1]/div/span[1]',
+        directors: WebElement = self.extract_director(
+            self.wait.until(
+                EC.presence_of_element_located(
+                    (By.XPATH, '//*[@id="original_header"]/div[2]/section/div[3]/ol')
                 )
             )
         )
+
+        rating_element: WebElement = self.extract_rating(
+            self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'percent')))
+        )
+
+        # TODO: Find way how to convert age restrictions from different countries to one format
+        age_restriction: WebElement = self.wait.until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'certification'))
+        )
+
+        # cover_image_element: WebElement = self.wait.until(
+        #     EC.presence_of_element_located((By.XPATH, '//*[@id="lightbox_popup"]/a/img'))
+        # )
 
         new_film: int = FilmQuery.create_film(
             name=title_element.text,
@@ -116,12 +132,31 @@ class TmdbScraper(ScraperBase):
             categories=self.get_categories(genre_element),
             overview=overview_element.text,
             actors=self.get_actors(actors_element),
-            directors=directors,
-            rating=1,
-            cover_path="",
+            directors=self.get_directors(directors),
+            rating=rating_element,
+            #cover_path=self.store_cover_image(cover_image_element),
         )
 
         return new_film
+    
+    def get_directors(self, directors: Tuple[str, str]) -> List[Director]:
+        directors_list: List[Director] = []
+
+        for director in directors:
+            temp_director: Director = DirectorQuery.get_director_by_name(name=director[0], surname=director[1])
+
+            if isinstance(temp_director, Director):
+                directors_list.append(temp_director)
+            else:
+                created: Tuple[int] = DirectorQuery.create_director(name=director[0], surname=director[1])
+
+                if isinstance(created, Row):
+                    new_direcotr: Director = DirectorQuery.get_director_by_id(
+                        created[0]
+                    )
+                    directors_list.append(new_direcotr)
+        
+        return directors_list
 
     def get_categories(self, categories: List[str]) -> List[Category]:
         categories_list: List[Category] = []
@@ -163,22 +198,25 @@ class TmdbScraper(ScraperBase):
                     actors_list.append(new_actor)
 
         return actors_list
-    
-    def extract_director(self, people: WebElement):
-        people_list: List[WebElement] = people.find_elements(By.TAG_NAME, "li")
-        directors: List[SimpleNamespace] = []
 
-        for people in people_list: 
+    def extract_director(self, people: WebElement) -> List[Tuple[str,str]]:
+        people_list: List[WebElement] = people.find_elements(By.TAG_NAME, "li")
+        directors: List[Tuple[str,str]] = []
+
+        for people in people_list:
             name = people.find_element(By.TAG_NAME, "a")
 
             role = people.find_elements(By.TAG_NAME, "p")[1]
 
-            temp_person: SimpleNamespace = SimpleNamespace(name = name.text, role = [r.strip().lower() for r in role.text.split(",")])
+            temp_person: SimpleNamespace = SimpleNamespace(
+                name=name.text, role=[r.strip().lower() for r in role.text.split(",")]
+            )
 
             if "director" in temp_person.role:
-                directors.append(temp_person)
-
-        return directors  
+                name_surname: Tuple[str, str] = self.extract_name_surname(temp_person.name)
+                directors.append(name_surname)
+        
+        return directors
 
     def extract_genre(self, genres: WebElement) -> List[str]:
         genre_elements: List[WebElement] = genres.find_elements(By.TAG_NAME, "a")
@@ -208,9 +246,9 @@ class TmdbScraper(ScraperBase):
     def extract_actors(self, element: WebElement) -> List[str]:
         try:
             actors_card = element.find_elements(By.CLASS_NAME, "card")
-            actors = []
+            actors: List[str] = []
 
-            for i in range(4):
+            for i in range(len(actors_card)):
                 temp_actor = actors_card[i].find_element(
                     By.XPATH, f'//*[@id="cast_scroller"]/ol/li[{i+1}]/p[1]/a'
                 )
@@ -239,6 +277,26 @@ class TmdbScraper(ScraperBase):
 
         except Exception as e:
             raise
+
+    def extract_rating(self, rating_element: WebElement):
+        percentage_element: WebElement = rating_element.find_element(
+            By.TAG_NAME, "span"
+        )
+        percentage: str = percentage_element.get_attribute("class")
+        extracted_number: int = int(percentage.split("-")[1].split("r")[1])
+
+        return self.convert_to_star_rating(extracted_number)
+    
+    def convert_to_star_rating(self, percentage: int) -> int:
+        star_rating: int = (percentage / 100) * 10
+        return star_rating
+    
+    # def store_cover_image(self, image_element: WebElement) -> str:
+    #     img_src: str = image_element.get_attribute("src")
+
+    #     print(img_src)
+
+    #     urlretrieve(img_src, "test.png")
 
     def close(self):
         self.driver.quit()

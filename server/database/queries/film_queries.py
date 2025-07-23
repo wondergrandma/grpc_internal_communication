@@ -5,6 +5,7 @@ from sqlalchemy import select
 from server.database.models.actor import Actor
 from server.database.models.category import Category
 from server.database.models.film import Film
+from server.database.models.director import Director
 from server.database.queries import Connector, Session
 
 
@@ -27,7 +28,7 @@ class FilmQuery:
         categories: List[Category],
         overview: str,
         actors: List[Actor],
-        directors: str,
+        directors: List[Director],
         rating: int,
         cover_path: str,
     ) -> int:
@@ -40,7 +41,7 @@ class FilmQuery:
                 Categories=categories,
                 Overview=overview,
                 Actors=actors,
-                Director=directors,
+                Directors=directors,
                 Rating=rating,
                 CoverPath=cover_path,
             )

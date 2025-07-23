@@ -24,7 +24,7 @@ class ActorQuery:
         return result
 
     @staticmethod
-    def create_actor(name, surname) -> Row:
+    def create_actor(name: str, surname: str) -> Row:
         try:
             stmt = insert(Actor).values(Name=name, Surname=surname)
             result = ActorQuery.session.execute(stmt)
