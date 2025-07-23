@@ -18,8 +18,8 @@ from server.database.models.category import Category
 from server.database.models.director import Director
 from server.database.queries.actor_queries import ActorQuery
 from server.database.queries.category_queries import CategoryQuery
-from server.database.queries.film_queries import FilmQuery
 from server.database.queries.director_queries import DirectorQuery
+from server.database.queries.film_queries import FilmQuery
 from server.scraper.dto import ScrapedFilm
 from server.scraper.scraper_base import ScraperBase
 
@@ -112,12 +112,12 @@ class TmdbScraper(ScraperBase):
         )
 
         rating_element: WebElement = self.extract_rating(
-            self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'percent')))
+            self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "percent")))
         )
 
         # TODO: Find way how to convert age restrictions from different countries to one format
         age_restriction: WebElement = self.wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'certification'))
+            EC.presence_of_element_located((By.CLASS_NAME, "certification"))
         )
 
         # cover_image_element: WebElement = self.wait.until(
@@ -134,28 +134,32 @@ class TmdbScraper(ScraperBase):
             actors=self.get_actors(actors_element),
             directors=self.get_directors(directors),
             rating=rating_element,
-            #cover_path=self.store_cover_image(cover_image_element),
+            # cover_path=self.store_cover_image(cover_image_element),
         )
 
         return new_film
-    
+
     def get_directors(self, directors: Tuple[str, str]) -> List[Director]:
         directors_list: List[Director] = []
 
         for director in directors:
-            temp_director: Director = DirectorQuery.get_director_by_name(name=director[0], surname=director[1])
+            temp_director: Director = DirectorQuery.get_director_by_name(
+                name=director[0], surname=director[1]
+            )
 
             if isinstance(temp_director, Director):
                 directors_list.append(temp_director)
             else:
-                created: Tuple[int] = DirectorQuery.create_director(name=director[0], surname=director[1])
+                created: Tuple[int] = DirectorQuery.create_director(
+                    name=director[0], surname=director[1]
+                )
 
                 if isinstance(created, Row):
                     new_direcotr: Director = DirectorQuery.get_director_by_id(
                         created[0]
                     )
                     directors_list.append(new_direcotr)
-        
+
         return directors_list
 
     def get_categories(self, categories: List[str]) -> List[Category]:
@@ -199,9 +203,9 @@ class TmdbScraper(ScraperBase):
 
         return actors_list
 
-    def extract_director(self, people: WebElement) -> List[Tuple[str,str]]:
+    def extract_director(self, people: WebElement) -> List[Tuple[str, str]]:
         people_list: List[WebElement] = people.find_elements(By.TAG_NAME, "li")
-        directors: List[Tuple[str,str]] = []
+        directors: List[Tuple[str, str]] = []
 
         for people in people_list:
             name = people.find_element(By.TAG_NAME, "a")
@@ -213,9 +217,11 @@ class TmdbScraper(ScraperBase):
             )
 
             if "director" in temp_person.role:
-                name_surname: Tuple[str, str] = self.extract_name_surname(temp_person.name)
+                name_surname: Tuple[str, str] = self.extract_name_surname(
+                    temp_person.name
+                )
                 directors.append(name_surname)
-        
+
         return directors
 
     def extract_genre(self, genres: WebElement) -> List[str]:
@@ -286,11 +292,11 @@ class TmdbScraper(ScraperBase):
         extracted_number: int = int(percentage.split("-")[1].split("r")[1])
 
         return self.convert_to_star_rating(extracted_number)
-    
+
     def convert_to_star_rating(self, percentage: int) -> int:
         star_rating: int = (percentage / 100) * 10
         return star_rating
-    
+
     # def store_cover_image(self, image_element: WebElement) -> str:
     #     img_src: str = image_element.get_attribute("src")
 

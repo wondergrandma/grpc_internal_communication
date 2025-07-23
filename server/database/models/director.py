@@ -1,8 +1,9 @@
-from server.database.models.base import Base
 from typing import List
 
-from server.database.models.asociations.director_film import director_film
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from server.database.models.asociations.director_film import director_film
+from server.database.models.base import Base
 
 
 class Director(Base):
