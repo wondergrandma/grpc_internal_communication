@@ -1,3 +1,5 @@
+import glob
+import os
 import re
 from types import SimpleNamespace
 from typing import List, Tuple
@@ -13,6 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from sqlalchemy.engine.row import Row
 
+from server import IMAGE_STORAGE_DIRECTORY
 from server.database.models.actor import Actor
 from server.database.models.category import Category
 from server.database.models.director import Director
@@ -120,9 +123,9 @@ class TmdbScraper(ScraperBase):
             EC.presence_of_element_located((By.CLASS_NAME, "certification"))
         )
 
-        # cover_image_element: WebElement = self.wait.until(
-        #     EC.presence_of_element_located((By.XPATH, '//*[@id="lightbox_popup"]/a/img'))
-        # )
+        cover_image_element: WebElement = self.wait.until(
+            EC.presence_of_element_located((By.CLASS_NAME, "image_content"))
+        )
 
         new_film: int = FilmQuery.create_film(
             name=title_element.text,
@@ -134,7 +137,7 @@ class TmdbScraper(ScraperBase):
             actors=self.get_actors(actors_element),
             directors=self.get_directors(directors),
             rating=rating_element,
-            # cover_path=self.store_cover_image(cover_image_element),
+            cover_path=self.store_cover_image(cover_image_element),
         )
 
         return new_film
@@ -297,12 +300,40 @@ class TmdbScraper(ScraperBase):
         star_rating: int = (percentage / 100) * 10
         return star_rating
 
-    # def store_cover_image(self, image_element: WebElement) -> str:
-    #     img_src: str = image_element.get_attribute("src")
+    def store_cover_image(self, image_element: WebElement) -> str:
+        img: WebElement = image_element.find_element(By.TAG_NAME, "img")
+        srcset: str = img.get_attribute("srcset")
+        split: str = srcset.split(",")[1].split(" ")
+        image_number: int
 
-    #     print(img_src)
+        for s in split:
+            if re.search(r"^https://.*(\.)([a-zA-Z]{3})", s) != None:
+                cover_image_number: int = self.generate_cover_image_number()
+                image_number = cover_image_number
+                urlretrieve(
+                    s, f"{IMAGE_STORAGE_DIRECTORY}/cover_image_{cover_image_number}.jpg"
+                )
 
-    #     urlretrieve(img_src, "test.png")
+        return f"cover_image_{image_number}.jpg"
+
+    def generate_cover_image_number(self) -> int:
+        last_file_number: int = 0
+
+        if last_file_number == 0:
+            list_of_files: List[str] = glob.glob(f"{IMAGE_STORAGE_DIRECTORY}/*.jpg")
+            last_created_file: str = max(list_of_files, key=os.path.getctime).split(
+                "/"
+            )[-1]
+            last_file_number: int = int(
+                re.match(r"^(cover_image_)(\d*)(\.jpg)$", last_created_file).group(2)
+            )
+
+        while os.path.exists(
+            f"{IMAGE_STORAGE_DIRECTORY}/cover_image_{last_file_number}.jpg"
+        ):
+            last_file_number += 1
+
+        return last_file_number
 
     def close(self):
         self.driver.quit()
