@@ -4,6 +4,7 @@
 # Project files
 poetry.*
 images/
+logs/
 
 ### macOS ###
 # General
