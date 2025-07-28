@@ -10,6 +10,10 @@ class ScraperBase(ABC):
         pass
 
     @abstractmethod
+    def search_film(self):
+        pass
+
+    @abstractmethod
     def scrape(self) -> bool:
         pass
 
