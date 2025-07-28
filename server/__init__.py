@@ -36,6 +36,5 @@ handler = logging.handlers.RotatingFileHandler(
     backupCount=5,
 )
 logging.basicConfig(
-    format=FORMAT,
-    level=log_level_dict.get(LOG_LEVEL, logging.INFO), handlers=[handler]
+    format=FORMAT, level=log_level_dict.get(LOG_LEVEL, logging.INFO), handlers=[handler]
 )
