@@ -13,7 +13,9 @@ from server.database.models.actor import Actor
 from server.scraper.tmdb_scraper import TmdbScraper
 
 scraper = TmdbScraper()
-scraper.scrape(searched_film="Blade runner 2049")
+# scraper.scrape(searched_film="Blade runner 2049")
+scraper.scrape(searched_film="Blade Runner 2049")
+#scraper.scrape(searched_film="Avengers: Endgame")
 scraper.close()
 
 # result = Utils.get_actor(name="Tos", surname="Hanks")

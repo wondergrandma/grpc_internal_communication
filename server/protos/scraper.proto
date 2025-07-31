@@ -11,5 +11,5 @@ message Request{
 }
 
 message Response{
-    bool scraped = 1;
+    int32 scraped = 1;
 }

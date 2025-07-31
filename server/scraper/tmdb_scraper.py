@@ -82,7 +82,7 @@ class TmdbScraper(ScraperBase):
             rating=self.extract_rating(self._get_rating()),
             cover_path=self.store_cover_image(self._get_cover_image()),
         )
-
+        
         return new_film
 
     def _get_title_element(self) -> WebElement:
@@ -107,8 +107,7 @@ class TmdbScraper(ScraperBase):
         return make_year_element
 
     def _get_time(self):
-        length_element: WebElement = self.extract_time(
-            self.wait.until(
+        length_element: WebElement = self.wait.until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
@@ -116,7 +115,6 @@ class TmdbScraper(ScraperBase):
                     )
                 )
             )
-        )
 
         return length_element
 
@@ -369,7 +367,6 @@ class TmdbScraper(ScraperBase):
 
         return f"cover_image_{image_number}.jpg"
 
-    # TODO: Create default image if no image is found
     def generate_cover_image_number(self) -> int:
         last_file_number: int = 0
 
@@ -392,7 +389,7 @@ class TmdbScraper(ScraperBase):
 
             return last_file_number
         except Exception:
-
+            # TODO: Create default image if no image is found
             raise
 
     def close(self):
