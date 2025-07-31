@@ -3,6 +3,9 @@
 
 # Project files
 poetry.*
+images/
+logs/
+scrape.py
 
 ### macOS ###
 # General

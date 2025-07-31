@@ -1,8 +1,8 @@
 from sqlalchemy import insert, select
 from sqlalchemy.engine.row import Row
 
-from database.models.actor import Actor
-from database.queries import Connector, Session
+from server.database.models.actor import Actor
+from server.database.queries import Connector, Session
 
 
 class ActorQuery:
@@ -24,7 +24,7 @@ class ActorQuery:
         return result
 
     @staticmethod
-    def create_actor(name, surname) -> Row:
+    def create_actor(name: str, surname: str) -> Row:
         try:
             stmt = insert(Actor).values(Name=name, Surname=surname)
             result = ActorQuery.session.execute(stmt)

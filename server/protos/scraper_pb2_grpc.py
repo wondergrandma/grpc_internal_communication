@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from protos import scraper_pb2 as protos_dot_scraper__pb2
+from server.protos import scraper_pb2 as protos_dot_scraper__pb2
 
 GRPC_GENERATED_VERSION = '1.73.1'
 GRPC_VERSION = grpc.__version__

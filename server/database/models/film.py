@@ -1,11 +1,11 @@
 from typing import List
 
-import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.models.asociations.actor_film import actor_film
-from database.models.asociations.category_film import category_film
-from database.models.base import Base
+from server.database.models.asociations.actor_film import actor_film
+from server.database.models.asociations.category_film import category_film
+from server.database.models.asociations.director_film import director_film
+from server.database.models.base import Base
 
 
 class Film(Base):
@@ -23,8 +23,9 @@ class Film(Base):
     Actors: Mapped[List["Actor"]] = relationship(  # type: ignore
         "Actor", secondary=actor_film, back_populates="Film"
     )
-    Director: Mapped[str] = mapped_column()
-    Writer: Mapped[str] = mapped_column()
+    Directors: Mapped[List["Director"]] = relationship(  # type: ignore
+        "Director", secondary=director_film, back_populates="Film"
+    )
     Rating: Mapped[int] = mapped_column()
     CoverPath: Mapped[str] = mapped_column()
 

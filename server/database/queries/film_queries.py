@@ -2,10 +2,11 @@ from typing import List
 
 from sqlalchemy import select
 
-from database.models.actor import Actor
-from database.models.category import Category
-from database.models.film import Film
-from database.queries import Connector, Session
+from server.database.models.actor import Actor
+from server.database.models.category import Category
+from server.database.models.director import Director
+from server.database.models.film import Film
+from server.database.queries import Connector, Session
 
 
 class FilmQuery:
@@ -27,8 +28,7 @@ class FilmQuery:
         categories: List[Category],
         overview: str,
         actors: List[Actor],
-        director: str,
-        writer: str,
+        directors: List[Director],
         rating: int,
         cover_path: str,
     ) -> int:
@@ -41,8 +41,7 @@ class FilmQuery:
                 Categories=categories,
                 Overview=overview,
                 Actors=actors,
-                Director=director,
-                Writer=writer,
+                Directors=directors,
                 Rating=rating,
                 CoverPath=cover_path,
             )

@@ -2,8 +2,8 @@ from typing import List
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.models.asociations.category_film import category_film
-from database.models.base import Base
+from server.database.models.asociations.category_film import category_film
+from server.database.models.base import Base
 
 
 class Category(Base):
