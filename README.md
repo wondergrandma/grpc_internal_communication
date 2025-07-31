@@ -1,6 +1,6 @@
 # grpc_internal_communication
 
-GRPC Internal Communication is a scraping microservice designed for a film streaming platform. Its primary responsibility is to collect essential metadata about films uploaded to the service. This metadata is then made available to other services (such as frontend, mobile app). Data is stored in Postgre database.
+GRPC Internal Communication is a scraping microservice designed for a film streaming platform. Service is using remote procedure calls for communication. It's primary responsibility is to collect essential metadata about films uploaded to the service. This metadata is then made available to other services (such as frontend, mobile app). Data is stored in Postgre database.
 
 # Table of Contents
 - [Scraper](#Scraper)
